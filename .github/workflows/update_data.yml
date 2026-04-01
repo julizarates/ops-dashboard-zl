@@ -30,13 +30,13 @@ jobs:
           REDASH_API_KEY: ${{ secrets.REDASH_API_KEY }}
         run: python fetch_data.py
 
-      - name: Commit and push
+     - name: Commit and push
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git stash
           git pull origin main --rebase
-          git stash pop
+          git stash pop || true
           git add data.json
           git diff --cached --quiet || git commit -m "Update dashboard data"
-          git push origin main
+          git push origin main || true
