@@ -2,7 +2,10 @@ name: Update Dashboard Data
 
 on:
   schedule:
-    - cron: '0 11 * * *'
+    - cron: '0 11 * * *'   # 6am Colombia
+    - cron: '0 15 * * *'   # 10am Colombia
+    - cron: '0 19 * * *'   # 2pm Colombia
+    - cron: '0 23 * * *'   # 6pm Colombia
   workflow_dispatch:
 
 permissions:
