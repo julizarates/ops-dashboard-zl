@@ -2,10 +2,10 @@ name: Update Dashboard Data
 
 on:
   schedule:
-    - cron: '0 11 * * *'   # 6am Colombia
-    - cron: '0 15 * * *'   # 10am Colombia
-    - cron: '0 19 * * *'   # 2pm Colombia
-    - cron: '0 23 * * *'   # 6pm Colombia
+    - cron: '0 11 * * *'
+    - cron: '0 15 * * *'
+    - cron: '0 19 * * *'
+    - cron: '0 23 * * *'
   workflow_dispatch:
 
 permissions:
@@ -28,15 +28,12 @@ jobs:
       - name: Fetch Redash data
         env:
           REDASH_API_KEY: ${{ secrets.REDASH_API_KEY }}
-          
+        run: python fetch_data.py
+
       - name: Commit and push
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add data.json
-          git diff --cached --quiet || git commit -m "Update dashboard data"
-          git push origin main || true
-          git stash pop || true
           git add data.json
           git diff --cached --quiet || git commit -m "Update dashboard data"
           git push origin main || true
