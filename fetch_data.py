@@ -10,7 +10,6 @@ QUERIES = {
     'dr_picker':      130990,
     'dr_pie':         130991,
     'dr_hora':        130992,
-    'dr_productos':   130993,
     'dr_detalle':     130995,
     'so_counter':     130925,
     'so_tienda':      130922,
