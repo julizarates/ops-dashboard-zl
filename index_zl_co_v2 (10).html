@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>DS Zone Lead — Colombia</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+:root {
+  --bg:#F4F6F9;--card:#FFFFFF;--border:#E8ECF0;--text:#1A2332;--muted:#6B7A8D;
+  --green:#10B981;--red:#EF4444;--yellow:#F59E0B;--blue:#3B82F6;--orange:#FF6B35;
+  --shadow:0 1px 3px rgba(0,0,0,0.08);--shadow-md:0 4px 6px rgba(0,0,0,0.07);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:32px;}
+
+.header{background:var(--card);border-bottom:1px solid var(--border);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--shadow);}
+.header-left{display:flex;align-items:center;gap:10px;}
+.logo{width:32px;height:32px;background:var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12px;color:white;}
+.header h1{font-size:15px;font-weight:600;}
+.header p{font-size:11px;color:var(--muted);}
+.header-right{display:flex;align-items:center;gap:8px;}
+.refresh-btn{display:flex;align-items:center;gap:5px;background:none;border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;}
+.refresh-btn:hover{background:var(--bg);}
+.refresh-btn.spinning svg{animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.update-time{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;}
+
+.filter-bar{background:var(--card);border-bottom:1px solid var(--border);padding:12px 16px;}
+.filter-title{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;}
+.filter-meta{font-size:11px;color:var(--muted);margin-top:6px;}
+
+.dropdown-wrap{position:relative;}
+.dropdown-btn{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:space-between;text-align:left;}
+.dropdown-btn:focus{outline:none;border-color:var(--blue);}
+.dropdown-btn svg{flex-shrink:0;transition:transform 0.2s;}
+.dropdown-btn.open svg{transform:rotate(180deg);}
+.dropdown-menu{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-md);z-index:200;max-height:280px;overflow-y:auto;}
+.dropdown-search{padding:8px 12px;border-bottom:1px solid var(--border);}
+.dropdown-search input{width:100%;border:none;background:var(--bg);border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text);}
+.dropdown-search input:focus{outline:none;}
+.dropdown-item{display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;font-size:13px;transition:background 0.1s;}
+.dropdown-item:hover{background:var(--bg);}
+.dropdown-item.all-item{border-bottom:1px solid var(--border);font-weight:600;}
+.dropdown-check{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s;}
+.dropdown-item.checked .dropdown-check{background:var(--blue);border-color:var(--blue);}
+.dropdown-item.checked .dropdown-check::after{content:'';width:8px;height:5px;border-left:2px solid white;border-bottom:2px solid white;transform:rotate(-45deg) translate(1px,-1px);}
+.selected-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;}
+.selected-tag{background:#EFF6FF;color:var(--blue);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:500;display:flex;align-items:center;gap:4px;}
+.selected-tag button{background:none;border:none;cursor:pointer;color:var(--blue);font-size:13px;line-height:1;padding:0;}
+
+.section-title{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);padding:16px 16px 8px;}
+
+.counters-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:0 16px;}
+.counter-card{background:var(--card);border-radius:12px;padding:12px 14px;box-shadow:var(--shadow);border-top:3px solid transparent;}
+.counter-card.good{border-top-color:var(--green);}
+.counter-card.bad{border-top-color:var(--red);}
+.counter-card.warn{border-top-color:var(--yellow);}
+.counter-card.pending{border-top-color:var(--border);}
+.counter-label{font-size:9px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.counter-target{font-size:9px;color:var(--muted);}
+.counter-target span{font-family:'DM Mono',monospace;}
+.counter-value{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;line-height:1.2;margin:3px 0;}
+.counter-card.good .counter-value{color:var(--green);}
+.counter-card.bad .counter-value{color:var(--red);}
+.counter-card.warn .counter-value{color:var(--yellow);}
+.counter-card.pending .counter-value{color:var(--muted);}
+.counter-sub{font-size:10px;color:var(--muted);}
+.counter-sub .ok{color:var(--green);font-weight:600;}
+.counter-sub .nok{color:var(--red);font-weight:600;}
+
+.chart-card{margin:0 16px;background:var(--card);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;}
+.chart-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.chart-header h3{font-size:13px;font-weight:600;}
+.chart-header p{font-size:11px;color:var(--muted);}
+.chart-body{padding:16px;}
+.chart-body canvas{max-height:180px;}
+
+.donut-row{display:grid;grid-template-columns:1fr;gap:10px;padding:0 16px;}
+@media(min-width:600px){.donut-row{grid-template-columns:1fr 1fr;}}
+
+.table-card{margin:0 16px;background:var(--card);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;}
+.table-scroll{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th{background:var(--bg);padding:8px 12px;text-align:left;font-size:10px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap;}
+td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text);white-space:nowrap;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--bg);}
+
+.alert-card{margin:0 16px;background:var(--card);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;}
+.alert-row{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);}
+.alert-row:last-child{border-bottom:none;}
+.alert-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.alert-dot.red{background:var(--red);}
+.alert-dot.yellow{background:var(--yellow);}
+.alert-dot.green{background:var(--green);}
+.alert-text{font-size:12px;line-height:1.5;}
+.alert-text strong{font-weight:600;}
+.alert-text span{color:var(--muted);font-size:11px;display:block;margin-top:1px;}
+
+.store-details{padding:0 16px;display:flex;flex-direction:column;gap:10px;}
+
+.links-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;}
+.link-card{background:var(--card);border-radius:12px;padding:14px;box-shadow:var(--shadow);text-decoration:none;display:flex;align-items:center;gap:10px;border:1px solid var(--border);transition:all 0.2s;}
+.link-card:hover{border-color:var(--orange);transform:translateY(-1px);}
+.link-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;}
+.link-card h4{font-size:12px;font-weight:600;color:var(--text);}
+.link-card p{font-size:10px;color:var(--muted);margin-top:1px;}
+
+.loading-overlay{display:flex;align-items:center;justify-content:center;padding:40px;gap:10px;color:var(--muted);font-size:13px;}
+.spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--orange);border-radius:50%;animation:spin 0.8s linear infinite;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="logo">ZL</div>
+    <div>
+      <h1>DS Zone Lead</h1>
+      <p>Colombia — Turbo</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="update-time" id="lastUpdate">—</span>
+    <button class="refresh-btn" onclick="init()" id="refreshBtn">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.66 0 3-4.03 3-9s-1.34-9-3-9m0 18c-1.66 0-3-4.03-3-9s1.34-9 3-9"/>
+      </svg>
+      Actualizar
+    </button>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <div class="filter-title">Tiendas</div>
+  <div class="dropdown-wrap" id="dropdownWrap">
+    <button class="dropdown-btn" id="dropdownBtn" onclick="toggleDropdown()">
+      <span id="dropdownLabel">Selecciona tiendas...</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="dropdown-menu" id="dropdownMenu" style="display:none">
+      <div class="dropdown-search"><input type="text" placeholder="Buscar tienda..." oninput="filterDropdown(this.value)" id="dropdownSearch"></div>
+      <div class="dropdown-item all-item" id="allItem" onclick="toggleAll()">
+        <div class="dropdown-check" id="allCheck"></div>
+        <span>Todas las tiendas</span>
+      </div>
+      <div id="dropdownItems"></div>
+    </div>
+  </div>
+  <div class="selected-tags" id="selectedTags"></div>
+  <div class="filter-meta" id="selectedCount">Ninguna seleccionada</div>
+</div>
+
+<div id="mainContent">
+  <div class="loading-overlay"><div class="spinner"></div> Cargando datos...</div>
+</div>
+
+<script>
+const TARGETS = { dr: 1.45, so: 2.0, cancel: 0.15 };
+
+const STORES = [
+  'San Vicente','Parque del Perro','C Jardin CLO','Limonar','Chapinero',
+  'Parque Bavaria','Niza','Comuneros','Esperanza','Americas','Modelia',
+  'La Mota','La Playa','Manila','San Pablo','Laureles','Villa Andalucia BAQ',
+  'El Poblado Baq','El Prado BAQ','Las Colinas','Bavaria SM','Rodadero',
+  'Bocagrande','Manga','Mar Del Norte','Castellana','Alameda','Valledupar',
+  'Palermo','Engativa Occidental','Colina','Cedritos','Country','Quinta Camacho',
+  'Chilacos','Suba Turingia','Barrancas','Turbo Polo','Iserra 100','San Patricio',
+  'Titan','Granada Norte','Usaquen','La cabana','Chico','Verbenal','La Frontera',
+  'Tesoro','Sabaneta','Envigado bajo','Envigado alto','Armenia','Cabecera',
+  'Cañaveral','El Rosal','Ibague','Pereira','Villavicencio','Manizales','Prado Veraniego'
+];
+
+let selectedStores = [];
+let allData = {};
+let charts = {};
+
+function getStatus(val, target) {
+  if (!val && val !== 0) return 'pending';
+  if (val <= target * 0.9) return 'good';
+  if (val <= target) return 'warn';
+  return 'bad';
+}
+
+function colorMap(status) {
+  return { good: 'var(--green)', bad: 'var(--red)', warn: 'var(--yellow)', pending: 'var(--muted)' }[status] || 'var(--muted)';
+}
+
+async function init() {
+  const btn = document.getElementById('refreshBtn');
+  btn.classList.add('spinning');
+  try {
+    const res = await fetch('data.json?t=' + Date.now());
+    allData = await res.json();
+    const now = new Date().toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('lastUpdate').textContent = now;
+    initChips();
+    if (selectedStores.length > 0) render();
+    else document.getElementById('mainContent').innerHTML = '<div class="loading-overlay">Selecciona una o varias tiendas</div>';
+  } catch(e) {
+    document.getElementById('mainContent').innerHTML = `<div style="margin:16px;background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:12px 16px;font-size:12px;color:var(--red)">Error cargando datos: ${e.message}</div>`;
+  }
+  btn.classList.remove('spinning');
+}
+
+function initChips() {
+  const container = document.getElementById('storeChips');
+  if (container.children.length > 0) return;
+  const allChip = document.createElement('div');
+  allChip.className = 'store-chip all';
+  allChip.textContent = 'Todas';
+  allChip.onclick = toggleAll;
+  container.appendChild(allChip);
+  STORES.forEach(s => {
+    const chip = document.createElement('div');
+    chip.className = 'store-chip';
+    chip.textContent = s;
+    chip.dataset.store = s;
+    chip.onclick = () => toggleStore(s);
+    container.appendChild(chip);
+  });
+}
+
+function toggleDropdown() {
+  const menu = document.getElementById('dropdownMenu');
+  const btn = document.getElementById('dropdownBtn');
+  const isOpen = menu.style.display !== 'none';
+  menu.style.display = isOpen ? 'none' : 'block';
+  btn.classList.toggle('open', !isOpen);
+  if (!isOpen) document.getElementById('dropdownSearch').focus();
+}
+
+document.addEventListener('click', e => {
+  const wrap = document.getElementById('dropdownWrap');
+  if (wrap && !wrap.contains(e.target)) {
+    document.getElementById('dropdownMenu').style.display = 'none';
+    document.getElementById('dropdownBtn').classList.remove('open');
+  }
+});
+
+function filterDropdown(q) {
+  const items = document.querySelectorAll('.dropdown-item[data-store]');
+  items.forEach(item => {
+    item.style.display = item.dataset.store.toLowerCase().includes(q.toLowerCase()) ? 'flex' : 'none';
+  });
+}
+
+function initChips() {
+  const container = document.getElementById('dropdownItems');
+  if (container.children.length > 0) return;
+  STORES.forEach(s => {
+    const item = document.createElement('div');
+    item.className = 'dropdown-item';
+    item.dataset.store = s;
+    item.innerHTML = `<div class="dropdown-check"></div><span>${s}</span>`;
+    item.onclick = () => toggleStore(s);
+    container.appendChild(item);
+  });
+}
+
+function toggleAll() {
+  selectedStores = selectedStores.length === STORES.length ? [] : [...STORES];
+  updateChips();
+  render();
+}
+
+function toggleStore(name) {
+  selectedStores = selectedStores.includes(name)
+    ? selectedStores.filter(s => s !== name)
+    : [...selectedStores, name];
+  updateChips();
+  render();
+}
+
+function removeStore(name) {
+  selectedStores = selectedStores.filter(s => s !== name);
+  updateChips();
+  render();
+}
+
+function updateChips() {
+  // Update dropdown items
+  document.querySelectorAll('.dropdown-item[data-store]').forEach(item => {
+    item.classList.toggle('checked', selectedStores.includes(item.dataset.store));
+  });
+  const allCheck = document.getElementById('allCheck');
+  const allItem = document.getElementById('allItem');
+  if (selectedStores.length === STORES.length) {
+    allItem.classList.add('checked');
+  } else {
+    allItem.classList.remove('checked');
+  }
+
+  // Update selected tags
+  const tagsEl = document.getElementById('selectedTags');
+  tagsEl.innerHTML = selectedStores.slice(0, 5).map(s =>
+    `<div class="selected-tag">${s}<button onclick="removeStore('${s}')">×</button></div>`
+  ).join('') + (selectedStores.length > 5 ? `<div class="selected-tag">+${selectedStores.length - 5} más</div>` : '');
+
+  // Update label and count
+  const n = selectedStores.length;
+  document.getElementById('dropdownLabel').textContent =
+    n === 0 ? 'Selecciona tiendas...' :
+    n === STORES.length ? 'Todas las tiendas' :
+    `${n} tienda${n > 1 ? 's' : ''} seleccionada${n > 1 ? 's' : ''}`;
+  document.getElementById('selectedCount').textContent =
+    n === 0 ? 'Ninguna seleccionada' :
+    n === STORES.length ? 'Todas las tiendas' :
+    `${n} tienda${n > 1 ? 's' : ''} seleccionada${n > 1 ? 's' : ''}`;
+}
+
+function filterByStores(rows, storeKey) {
+  if (selectedStores.length === 0 || selectedStores.length === STORES.length) return rows;
+  return rows.filter(r => selectedStores.includes(r[storeKey] || r.Tienda || r.WAREHOUSENAME || r.Warehouse || ''));
+}
+
+function render() {
+  if (Object.keys(allData).length === 0) {
+    document.getElementById('mainContent').innerHTML = '<div class="loading-overlay"><div class="spinner"></div> Cargando datos...</div>';
+    return;
+  }
+  if (selectedStores.length === 0) {
+    document.getElementById('mainContent').innerHTML = '<div class="loading-overlay">Selecciona una o varias tiendas</div>';
+    return;
+  }
+
+  Object.values(charts).forEach(c => { try { c.destroy(); } catch(e) {} });
+  charts = {};
+
+  const drCounter  = allData.dr_counter  || [];
+  const drPicker   = allData.dr_picker   || [];
+  const drPie      = allData.dr_pie      || [];
+  const drHora     = allData.dr_hora     || [];
+  const drProds    = allData.dr_productos|| [];
+  const drDetalle  = allData.dr_detalle  || [];
+  const soCounter  = allData.so_counter  || [];
+  const soTienda   = allData.so_tienda   || [];
+  const soTipo     = allData.so_tipo     || [];
+  const soProds    = allData.so_productos|| [];
+  const soPickers  = allData.so_pickers  || [];
+
+  // SO tienda — names have "Turbo, " prefix, match loosely
+  const soTiendaFilt = selectedStores.length === STORES.length ? soTienda :
+    soTienda.filter(r => {
+      const name = (r.Tienda || '').replace(/^Turbo(?: Market)?,\s*/i, '').toLowerCase();
+      return selectedStores.some(s => name.includes(s.toLowerCase()) || s.toLowerCase().includes(name));
+    });
+  const soOk  = soTiendaFilt.filter(r => (r.Total_SOs || 0) === 0).length;
+  const soNok = soTiendaFilt.length - soOk;
+
+  // DR pickers — filter by Tienda column
+  const drPickerFilt = selectedStores.length === STORES.length ? drPicker :
+    drPicker.filter(r => selectedStores.includes(r.Tienda || ''));
+  const soPicFilt = selectedStores.length === STORES.length ? soPickers :
+    soPickers.filter(r => {
+      const name = (r.Tienda || '').replace(/^Turbo(?: Market)?,\s*/i, '').toLowerCase().trim();
+      return selectedStores.some(s => name.includes(s.toLowerCase()) || s.toLowerCase().includes(name));
+    });
+  const drDetFilt = selectedStores.length === STORES.length ? drDetalle :
+    drDetalle.filter(r => selectedStores.includes(r.Warehouse || ''));
+
+  // DR total from filtered detalle — show 0 if no defects in selected stores
+  const totalDR = selectedStores.length === STORES.length
+    ? (drCounter[0]?.Total_Defectos || 0)
+    : drDetFilt.length;
+
+  // Calculate SO from filtered tienda data
+  const totalSO = soTiendaFilt.reduce((acc, r) => acc + (r.Total_SOs || 0), 0);
+
+  // Alerts — store level metrics for ZL
+  const alerts = [];
+
+  // SO crítico por tienda
+  soTiendaFilt.filter(r => (r.Total_SOs || 0) > 5).forEach(r => {
+    alerts.push({ level: 'red', text: `SO crítico — ${r.Tienda}`, sub: `${r.Total_SOs} stockouts hoy — revisar inventario` });
+  });
+  soTiendaFilt.filter(r => (r.Total_SOs || 0) > 2 && (r.Total_SOs || 0) <= 5).forEach(r => {
+    alerts.push({ level: 'yellow', text: `SO en alerta — ${r.Tienda}`, sub: `${r.Total_SOs} stockouts hoy` });
+  });
+
+  // DR crítico por tienda — desde dr_detalle agrupado
+  const drPorTienda = {};
+  drDetFilt.forEach(r => {
+    const t = r.Warehouse || '';
+    if (!drPorTienda[t]) drPorTienda[t] = 0;
+    drPorTienda[t]++;
+  });
+  Object.entries(drPorTienda).filter(([,v]) => v > 10).forEach(([tienda, count]) => {
+    alerts.push({ level: 'yellow', text: `DR alto — ${tienda}`, sub: `${count} defectos hoy` });
+  });
+
+  if (alerts.length === 0) alerts.push({ level: 'green', text: 'Todas las tiendas dentro de rangos normales', sub: 'Sin alertas críticas al momento' });
+
+  document.getElementById('mainContent').innerHTML = `
+    <div class="section-title">Consolidado zona — ${selectedStores.length} tienda${selectedStores.length > 1 ? 's' : ''}</div>
+    <div class="counters-grid">
+      <div class="counter-card">
+        <div class="counter-label">Total Defectos</div>
+        <div class="counter-value" style="color:var(--text)">${totalDR}</div>
+        <div class="counter-sub">hoy</div>
+      </div>
+      <div class="counter-card">
+        <div class="counter-label">Total SO Ops</div>
+        <div class="counter-value" style="color:var(--text)">${totalSO}</div>
+        <div class="counter-sub"><span class="ok">${soOk} ok</span> / <span class="nok">${soNok} sobre</span></div>
+      </div>
+      <div class="counter-card pending">
+        <div class="counter-label">Cancel Rate</div>
+        <div class="counter-value">—</div>
+        <div class="counter-sub">Proximamente</div>
+      </div>
+    </div>
+
+    <div class="section-title">Alertas activas</div>
+    <div class="alert-card">
+      ${alerts.map(a => `
+        <div class="alert-row">
+          <div class="alert-dot ${a.level}"></div>
+          <div class="alert-text"><strong>${a.text}</strong><span>${a.sub}</span></div>
+        </div>`).join('')}
+    </div>
+
+    <div class="section-title">Defect Rate — distribucion</div>
+    <div class="donut-row">
+      <div class="chart-card">
+        <div class="chart-header"><h3>Por tipo</h3></div>
+        <div class="chart-body"><canvas id="drPieChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header"><h3>Por hora</h3></div>
+        <div class="chart-body"><canvas id="drHoraChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="section-title">Pickers con mas defectos</div>
+    <div class="table-card">
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Picker</th><th>Defectos</th><th>Ordenes</th><th>Tasa %</th></tr></thead>
+          <tbody>
+            ${drPickerFilt.slice(0, 15).map(r => `
+              <tr>
+                <td style="font-weight:500">${r.Picker || '—'}</td>
+                <td style="font-family:'DM Mono',monospace">${r.Defectos || 0}</td>
+                <td style="font-family:'DM Mono',monospace">${r.Total_Ordenes || 0}</td>
+                <td style="font-family:'DM Mono',monospace;font-weight:500;color:${parseFloat(r.Tasa_Defecto_Pct) > TARGETS.dr ? 'var(--red)' : 'var(--green)'}">${r.Tasa_Defecto_Pct || 0}%</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section-title">Top productos con defectos</div>
+    <div class="chart-card">
+      <div class="chart-header"><h3>Top 10 productos</h3></div>
+      <div class="chart-body"><canvas id="drProdChart"></canvas></div>
+    </div>
+
+    <div class="section-title">Stockouts — SO por tienda</div>
+    <div class="chart-card">
+      <div class="chart-header"><h3>SO por tienda</h3><p>Hoy</p></div>
+      <div class="chart-body"><canvas id="soTiendaChart"></canvas></div>
+    </div>
+
+    <div class="section-title">Distribucion SO</div>
+    <div class="donut-row">
+      <div class="chart-card">
+        <div class="chart-header"><h3>Tipo SO</h3></div>
+        <div class="chart-body"><canvas id="soTipoChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header"><h3>Top productos SO</h3></div>
+        <div class="chart-body"><canvas id="soProdChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="section-title">Pickers con mas SO</div>
+    <div class="table-card">
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Picker</th><th>Tienda</th><th>Total SOs</th><th>Ordenes</th></tr></thead>
+          <tbody>
+            ${soPicFilt.length > 0 ? soPicFilt.slice(0, 15).map(r => `
+              <tr>
+                <td style="font-weight:500">${r.Picker || r.picker_name || '—'}</td>
+                <td>${r.Tienda || '—'}</td>
+                <td style="font-family:'DM Mono',monospace;font-weight:500;color:var(--red)">${r.Total_SOs || 0}</td>
+                <td style="font-family:'DM Mono',monospace">${r.Ordenes_Afectadas || 0}</td>
+              </tr>`).join('') : '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px">Sin datos</td></tr>'}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section-title">Ver detalle completo en Redash</div>
+    <div class="links-row">
+      <a class="link-card" href="https://redash.rappi.com/public/dashboards/ZImjclHwnuUWS1gPCfPYFz4Wn7r4nvXdFHygrhWU?org_slug=default" target="_blank">
+        <div class="link-icon" style="background:#EDE9FE;color:#4C1D95">DR</div>
+        <div><h4>Defect Rate CO</h4><p>Detalle por tienda en Redash</p></div>
+      </a>
+      <a class="link-card" href="https://redash.rappi.com/public/dashboards/w5W3gZG1XksIkZvqjgFdSYSA53uYNiQqkJvFALD4?org_slug=default" target="_blank">
+        <div class="link-icon" style="background:#FEF3C7;color:#92400E">SO</div>
+        <div><h4>Stockouts CO</h4><p>Detalle por tienda en Redash</p></div>
+      </a>
+    </div>
+    <div style="height:20px"></div>
+  `;
+
+  setTimeout(() => {
+    const colorMap2 = { 'Producto Faltante':'#3B82F6','Mala Condicion':'#F97316','Producto Diferente':'#7C3AED' };
+
+    // Filter and aggregate drPie by selected stores
+    const drPieFilt = selectedStores.length === STORES.length ? drPie :
+      drPie.filter(r => selectedStores.includes(r.Tienda || ''));
+    const drPieAgg = {};
+    drPieFilt.forEach(r => { drPieAgg[r.Tipo_Defecto] = (drPieAgg[r.Tipo_Defecto] || 0) + r.Cantidad; });
+    const drPieLabels = Object.keys(drPieAgg);
+    const drPieData   = Object.values(drPieAgg);
+
+    // Filter and aggregate drHora by selected stores
+    const drHoraFilt = selectedStores.length === STORES.length ? drHora :
+      drHora.filter(r => selectedStores.includes(r.Tienda || ''));
+    const drHoraAgg = {};
+    drHoraFilt.forEach(r => { drHoraAgg[r.Hora] = (drHoraAgg[r.Hora] || 0) + r.Defectos; });
+    const drHoraLabels = Object.keys(drHoraAgg).sort();
+    const drHoraData   = drHoraLabels.map(h => drHoraAgg[h]);
+
+    // Filter drProds by selected stores
+    const drProdFilt = selectedStores.length === STORES.length ? drProds :
+      drProds.filter(r => selectedStores.includes(r.Tienda || ''));
+    const drProdAgg = {};
+    drProdFilt.forEach(r => { drProdAgg[r.Producto] = (drProdAgg[r.Producto] || 0) + r.Defectos; });
+    const drProdTop = Object.entries(drProdAgg).sort((a,b) => b[1]-a[1]).slice(0,10);
+
+    // Filter soProds by selected stores
+    const soProdFilt = selectedStores.length === STORES.length ? soProds :
+      soProds.filter(r => {
+        const name = (r.Tienda || '').replace(/^Turbo(?: Market)?,\s*/i, '').toLowerCase().trim();
+        return selectedStores.some(s => name.includes(s.toLowerCase()) || s.toLowerCase().includes(name));
+      });
+    const soProdAgg = {};
+    soProdFilt.forEach(r => { soProdAgg[r.Nombre_Producto] = (soProdAgg[r.Nombre_Producto] || 0) + (r.Veces_Removido || 0); });
+    const soProdTop = Object.entries(soProdAgg).sort((a,b) => b[1]-a[1]).slice(0,8);
+
+    const drPieCtx = document.getElementById('drPieChart');
+    if (drPieCtx && drPieLabels.length) {
+      charts.drPie = new Chart(drPieCtx, {
+        type: 'doughnut',
+        data: { labels: drPieLabels, datasets: [{ data: drPieData, backgroundColor: drPieLabels.map(l => colorMap2[l] || '#94A3B8'), borderWidth: 0 }] },
+        options: { plugins: { legend: { position: 'bottom', labels: { font: { size: 10 }, padding: 6 } } }, cutout: '65%', responsive: true }
+      });
+    }
+
+    const drHoraCtx = document.getElementById('drHoraChart');
+    if (drHoraCtx && drHoraLabels.length) {
+      charts.drHora = new Chart(drHoraCtx, {
+        type: 'bar',
+        data: { labels: drHoraLabels, datasets: [{ data: drHoraData, backgroundColor: '#818CF8', borderRadius: 4, borderWidth: 0 }] },
+        options: { plugins: { legend: { display: false } }, scales: { y: { grid: { color: '#F1F5F9' }, ticks: { font: { size: 9 } } }, x: { grid: { display: false }, ticks: { font: { size: 9 }, maxRotation: 0 } } }, responsive: true }
+      });
+    }
+
+    const drProdCtx = document.getElementById('drProdChart');
+    if (drProdCtx && drProdTop.length) {
+      charts.drProd = new Chart(drProdCtx, {
+        type: 'bar',
+        data: { labels: drProdTop.map(([k]) => k.substring(0, 28)), datasets: [{ data: drProdTop.map(([,v]) => v), backgroundColor: '#818CF8', borderRadius: 4, borderWidth: 0 }] },
+        options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#F1F5F9' }, ticks: { font: { size: 9 } } }, y: { grid: { display: false }, ticks: { font: { size: 9 } } } }, responsive: true }
+      });
+    }
+
+    const soTiendaCtx = document.getElementById('soTiendaChart');
+    if (soTiendaCtx && soTiendaFilt.length) {
+      const top = soTiendaFilt.slice(0, 15);
+      charts.soTienda = new Chart(soTiendaCtx, {
+        type: 'bar',
+        data: { labels: top.map(r => r.Tienda || r.WAREHOUSENAME || '—'), datasets: [{ data: top.map(r => r.Total_SOs || 0), backgroundColor: top.map(r => (r.Total_SOs || 0) > 5 ? '#EF4444' : '#FB923C'), borderRadius: 4, borderWidth: 0 }] },
+        options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#F1F5F9' }, ticks: { font: { size: 9 } } }, y: { grid: { display: false }, ticks: { font: { size: 9 } } } }, responsive: true }
+      });
+    }
+
+    const soTipoCtx = document.getElementById('soTipoChart');
+    if (soTipoCtx && soTipo.length) {
+      charts.soTipo = new Chart(soTipoCtx, {
+        type: 'doughnut',
+        data: { labels: soTipo.map(r => r.Tipo_SO || r.STOCKOUT_TYPE), datasets: [{ data: soTipo.map(r => r.Cantidad || r.COUNT || 0), backgroundColor: ['#EF4444','#F59E0B'], borderWidth: 0 }] },
+        options: { plugins: { legend: { position: 'bottom', labels: { font: { size: 10 }, padding: 6 } } }, cutout: '65%', responsive: true }
+      });
+    }
+
+    const soProdCtx = document.getElementById('soProdChart');
+    if (soProdCtx && soProdTop.length) {
+      charts.soProd = new Chart(soProdCtx, {
+        type: 'bar',
+        data: { labels: soProdTop.map(([k]) => k.substring(0, 22)), datasets: [{ data: soProdTop.map(([,v]) => v), backgroundColor: '#FB923C', borderRadius: 4, borderWidth: 0 }] },
+        options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#F1F5F9' }, ticks: { font: { size: 9 } } }, y: { grid: { display: false }, ticks: { font: { size: 9 } } } }, responsive: true }
+      });
+    }
+  }, 100);
+}
+
+init();
+</script>
+</body>
+</html>
