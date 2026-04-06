@@ -14,6 +14,7 @@ QUERIES = {
     'so_counter':     130925,
     'so_tienda':      130922,
     'so_tipo':        130923,
+    'so_detalle':     128829,
     'so_productos':   130924,
     'so_pickers':     130934,
 }
